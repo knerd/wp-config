@@ -4,13 +4,14 @@
    * basic class to handle loading and maintaining default constants
    * supports quick setup of where wordpress lives and where you want your content directory to be
    * WP_DEBUG can also be turned on by using environment vars
-   * @version 0.0.0
+   * @version 0.0.2
    * @author xopherdeep
    * @see README.md
    */
   class WP_Config{        
     private $CONSTANTS;
     private $DEFAULTS;
+    private $DIR;
     private $VENDOR_DIR;
 
     /**
@@ -27,18 +28,18 @@
       $isProduction = $this->is_production( $WP_DEBUG );
 
       return [
-        'PROJECT_ROOT'       => __DIR__,
-        'ABSPATH'            => __DIR__ . "/{$DOCROOT}/{$WP_DIR}",
-        'VENDOR_PATH'        => __DIR__ . "/{$this->VENDOR_DIR}",
-        'DISALLOW_FILE_EDIT' => $isProduction,
         'IS_PRODUCTION'      => $isProduction,
+        'DISALLOW_FILE_EDIT' => $isProduction,
         'WP_DEBUG'           => !$isProduction,
         'WP_DEBUG_LOG'       => !$isProduction,
         'WP_DEBUG_DISPLAY'   => !$isProduction,
         'WP_HOME'            => "{$SITE_SCHEME}://{$SITE_HOST}",
         'WP_SITEURL'         => "{$SITE_SCHEME}://{$SITE_HOST}/{$WP_DIR}",
         'WP_CONTENT_URL'     => "{$SITE_SCHEME}://{$SITE_HOST}/{$WP_CONTENT}",
-        'WP_CONTENT_DIR'     => __DIR__ . "/{$DOCROOT}/{$WP_CONTENT}"
+        'WP_CONTENT_DIR'     => "{$this->DIR}/{$DOCROOT}/{$WP_CONTENT}",
+        'ABSPATH'            => "{$this->DIR}/{$DOCROOT}/{$WP_DIR}",
+        'VENDOR_PATH'        => "{$this->DIR}/{$this->VENDOR_DIR}",
+        'PROJECT_ROOT'       => "{$this->DIR}"
       ];
     }
 
@@ -56,7 +57,10 @@
      * @return string 
      */
     function get_vendor_dir(){
-      $json       = __DIR__ . "/composer.json";
+      $this->DIR  = $DIR = $this->DEFAULTS['DIR'];
+      if(!$DIR)
+        die('DIR not specified');
+      $json       = $DIR . "/composer.json";
       $json       = file_get_contents( $json );
       $json       = json_decode( $json );
       $vendor_dir = $json->config->{'vendor-dir'} ?? 'vendor';
@@ -96,6 +100,7 @@
      */
     function get_official_defaults( $defaults ){
       $custom = [
+        'DIR',
         'DOCROOT',
         'SITE_SCHEME',
         'WP_CONTENT', 
@@ -141,8 +146,8 @@
      * @return void
      */
     function load_local_config(){
-      $local   = __DIR__ . "/wp-config-local.php";
-      $secrets = __DIR__ . "/wp-secrets.php";
+      $local   = $this->DIR . "/wp-config-local.php";
+      $secrets = $this->DIR . "/wp-secrets.php";
       $this->require( $local, $secrets ); 
     }
 
