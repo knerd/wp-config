@@ -7,7 +7,7 @@ Souped Up WP_Config class to help make wp-config.php a bit more manageable
 <?php
   ...
   
-  $table_prefix = getenv('MYSQL_PREFIX') ?: 'wp_';
+  $table_prefix = 'wp_';
 
   /**
    * WP_Config
