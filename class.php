@@ -37,10 +37,6 @@
       $this->autoload();
     }
 
-    function __get($key){
-      return $this->DEFAULTS[$key];
-    }
-
     /**
      * get_vendor_dir
      * reads vendor-dir setting if found in composer.json
