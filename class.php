@@ -4,15 +4,59 @@
    * basic class to handle loading and maintaining default constants
    * supports quick setup of where wordpress lives and where you want your content directory to be
    * WP_DEBUG can also be turned on by using environment vars
-   * @version 0.0.2
+   * @version 0.0.3
    * @author xopherdeep
    * @see README.md
    */
   class WP_Config{        
     private $CONSTANTS;
+    private $CUSTOM = [
+      'DIR',
+      'DOCROOT',
+      'SITE_SCHEME',
+      'WP_CONTENT', 
+      'WP_DIR'
+    ];
     private $DEFAULTS;
     private $DIR;
     private $VENDOR_DIR;
+    
+    /**
+     * __construct
+     * pass defaults to class to define default constants
+     * will autoload composer if found and define any constants not set in local config
+     *
+     * @param  mixed $DEFAULTS
+     * @return void
+     */
+    function __construct( $DEFAULTS ) {
+      $this->DEFAULTS   = $DEFAULTS;
+      $this->VENDOR_DIR = $this->get_vendor_dir();
+      $this->CONSTANTS  = $this->get_defaults();
+      $this->CONSTANTS += $this->get_official_defaults( $DEFAULTS );
+      $this->autoload();
+    }
+
+    function __get($key){
+      return $this->DEFAULTS[$key];
+    }
+
+    /**
+     * get_vendor_dir
+     * reads vendor-dir setting if found in composer.json
+     * otherwise defaults to vendor 
+     *
+     * @return string 
+     */
+    function get_vendor_dir(){
+      $this->DIR  = $this->DEFAULTS['DIR'];
+      if(!$this->DIR)
+        throw new Exception('DIR not specified', 1);
+      $json       = "{$this->DIR}/composer.json";
+      $json       = json_decode( file_get_contents( $json ) );
+      $vendor_dir = $json->config->{'vendor-dir'} ?? 'vendor';
+      return $vendor_dir;
+    }
 
     /**
      * get_defaults
@@ -38,35 +82,12 @@
         'WP_CONTENT_URL'     => "{$SITE_SCHEME}://{$SITE_HOST}/{$WP_CONTENT}",
         'WP_CONTENT_DIR'     => "{$this->DIR}/{$DOCROOT}/{$WP_CONTENT}",
         'ABSPATH'            => "{$this->DIR}/{$DOCROOT}/{$WP_DIR}",
+        'DOCROOT'            => "{$this->DIR}/{$DOCROOT}",
         'VENDOR_PATH'        => "{$this->DIR}/{$this->VENDOR_DIR}",
         'PROJECT_ROOT'       => "{$this->DIR}"
       ];
     }
 
-    function __construct( $DEFAULTS ) {
-      $this->DEFAULTS   = $DEFAULTS;
-      $this->VENDOR_DIR = $this->get_vendor_dir();
-      $this->CONSTANTS  = $this->get_defaults();
-      $this->CONSTANTS += $this->get_official_defaults( $DEFAULTS );
-      $this->autoload();
-    }
-
-    /**
-     * get_vendor_dir
-     *
-     * @return string 
-     */
-    function get_vendor_dir(){
-      $this->DIR  = $DIR = $this->DEFAULTS['DIR'];
-      if(!$DIR)
-        die('DIR not specified');
-      $json       = $DIR . "/composer.json";
-      $json       = file_get_contents( $json );
-      $json       = json_decode( $json );
-      $vendor_dir = $json->config->{'vendor-dir'} ?? 'vendor';
-      return $vendor_dir;
-    }
-    
     /**
      * getenv_defaults
      * these values can be overridden using $ENV vars
@@ -99,15 +120,7 @@
      * @return array 
      */
     function get_official_defaults( $defaults ){
-      $custom = [
-        'DIR',
-        'DOCROOT',
-        'SITE_SCHEME',
-        'WP_CONTENT', 
-        'WP_DIR'
-      ]; 
-
-      foreach( $custom as $unofficial )
+      foreach( $this->CUSTOM as $unofficial )
         unset( $defaults[ $unofficial ] );
 
       return $defaults;
