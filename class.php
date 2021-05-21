@@ -4,22 +4,22 @@
    * basic class to handle loading and maintaining default constants
    * supports quick setup of where wordpress lives and where you want your content directory to be
    * WP_DEBUG can also be turned on by using environment vars
-   * @version 0.0.3
-   * @author xopherdeep
+   * @version 0.0.4
+   * @author Knerd 
    * @see README.md
    */
   class WP_Config{        
-    private $CONSTANTS;
-    private $CUSTOM = [
+    private array $CONSTANTS;
+    private array $CUSTOM = [
       'DIR',
       'DOCROOT',
       'SITE_SCHEME',
       'WP_CONTENT', 
       'WP_DIR'
     ];
-    private $DEFAULTS;
-    private $DIR;
-    private $VENDOR_DIR;
+    private array $DEFAULTS;
+    private string $DIR;
+    private string $VENDOR_DIR;
     
     /**
      * __construct
@@ -29,12 +29,27 @@
      * @param  mixed $DEFAULTS
      * @return void
      */
-    function __construct( $DEFAULTS ) {
-      $this->DEFAULTS   = $DEFAULTS;
-      $this->VENDOR_DIR = $this->get_vendor_dir();
-      $this->CONSTANTS  = $this->get_defaults();
-      $this->CONSTANTS += $this->get_official_defaults( $DEFAULTS );
-      $this->autoload();
+    function __construct( $defaults ) {
+      $this->set_defaults( $defaults );
+      $this->set_vendor_dir( $this->get_vendor_dir() );
+      $this->set_constants( $this->get_constants() );
+    }
+    
+    /**
+     * set_defaults
+     * @param  mixed $defaults
+     * @return void
+     */
+    public function set_defaults( $defaults ){
+      $this->DEFAULTS = $defaults;
+    }
+
+    public function set_vendor_dir( $vendor_dir ){
+      $this->VENDOR_DIR = $vendor_dir;
+    }
+
+    public function set_constants( $constants ){
+      $this->CONSTANTS = $constants;
     }
 
     /**
@@ -44,7 +59,7 @@
      *
      * @return string 
      */
-    function get_vendor_dir(){
+    public function get_vendor_dir(){
       $this->DIR  = $this->DEFAULTS['DIR'];
       if(!$this->DIR)
         throw new Exception('DIR not specified', 1);
@@ -52,6 +67,17 @@
       $json       = json_decode( file_get_contents( $json ) );
       $vendor_dir = $json->config->{'vendor-dir'} ?? 'vendor';
       return $vendor_dir;
+    }
+    
+    /**
+     * get_constants
+     *
+     * @return void
+     */
+    public function get_constants(){
+      $CONSTANTS  = $this->get_defaults();
+      $CONSTANTS += $this->get_official_defaults( $this->DEFAULTS );
+      return $CONSTANTS;
     }
 
     /**
@@ -61,7 +87,7 @@
      *
      * @return array 
      */
-    function get_defaults(){
+    public function get_defaults(){
       extract( $this->getenv_defaults() );
 
       //? IN PRODUCTION ENV?
@@ -90,7 +116,7 @@
      *
      * @return array 
      */
-    function getenv_defaults(){
+    private function getenv_defaults(){
       extract( $this->DEFAULTS );
 
       $prefix = getenv('MYSQL_PREFIX') ?: $DB_PREFIX;
@@ -115,7 +141,7 @@
      * @param  mixed $defaults
      * @return array 
      */
-    function get_official_defaults( $defaults ){
+    private function get_official_defaults( $defaults ){
       foreach( $this->CUSTOM as $unofficial )
         unset( $defaults[ $unofficial ] );
 
@@ -128,7 +154,7 @@
      *
      * @return void
      */
-    private function autoload(){
+    public function autoload(){
       $this->define_constants();
       $this->require( $this->VENDOR_DIR . '/autoload.php' ); 
     }
@@ -139,7 +165,7 @@
      *
      * @return void
      */
-    function define_constants(){
+    private function define_constants(){
       $this->load_local_config();
 
       // LOOP $CONSTANTS AND DEFINE DEFAULT I
@@ -154,7 +180,7 @@
      *
      * @return void
      */
-    function load_local_config(){
+    private function load_local_config(){
       $local   = $this->DIR . "/wp-config-local.php";
       $secrets = $this->DIR . "/wp-secrets.php";
       $this->require( $local, $secrets ); 
@@ -168,7 +194,7 @@
      * @param  mixed $debug
      * @return bool 
      */
-    function is_production( $isDebug ){
+    private function is_production( $isDebug ){
       $isDocksal = getenv('DOCKSAL_STACK');
       return !$isDocksal && !$isDebug;
     }
