@@ -29,10 +29,12 @@
      * @param  mixed $DEFAULTS
      * @return void
      */
-    function __construct( $defaults ) {
+    function __construct( $defaults, $autoload = true ) {
       $this->set_defaults( $defaults );
       $this->set_vendor_dir( $this->get_vendor_dir() );
       $this->set_constants( $this->get_constants() );
+      if( $autoload )
+        $this->autoload();
     }
     
     /**
