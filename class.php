@@ -9,17 +9,17 @@
    * @see README.md
    */
   class WP_Config{        
-    private array $CONSTANTS;
-    private array $CUSTOM = [
+    private $CONSTANTS;
+    private $CUSTOM = [
       'DIR',
       'DOCROOT',
       'SITE_SCHEME',
       'WP_CONTENT', 
       'WP_DIR'
     ];
-    private array $DEFAULTS;
-    private string $DIR;
-    private string $VENDOR_DIR;
+    private $DEFAULTS;
+    private $DIR;
+    private $VENDOR_DIR;
     
     /**
      * __construct
