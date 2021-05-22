@@ -158,7 +158,7 @@
      */
     public function autoload(){
       $this->define_constants();
-      $this->require( $this->VENDOR_DIR . '/autoload.php' ); 
+      $this->require( "{$this->DIR}/{$this->VENDOR_DIR}/autoload.php" ); 
     }
     
     /**
