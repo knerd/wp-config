@@ -1,10 +1,11 @@
 <?php
+  namespace knerd;
   /**
    * WP_Config
    * basic class to handle loading and maintaining default constants
    * supports quick setup of where wordpress lives and where you want your content directory to be
    * WP_DEBUG can also be turned on by using environment vars
-   * @version 0.0.4
+   * @version 1.0.0 
    * @author Knerd 
    * @see README.md
    */
