@@ -31,11 +31,18 @@
      * @return void
      */
     function __construct( $defaults, $autoload = true ) {
+      $this->fix_https();
       $this->set_defaults( $defaults );
       $this->set_vendor_dir( $this->get_vendor_dir() );
       $this->set_constants( $this->get_constants() );
       if( $autoload )
         $this->autoload();
+    }
+
+    // HELP WORDPRESS DETECT WHEN IT’S LOADED OVER HTTPS!
+    private function fix_https(){
+      $httpForwarded = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : false;
+      $_SERVER['HTTPS'] = ($httpForwarded === 'https') ? 'on' : '';
     }
     
     /**
