@@ -1,5 +1,5 @@
 {
-    "name": "xopher/wp-config",
+    "name": "knerd/wp-config",
     "description": "WP Config helper",
     "type": "library",
     "license": "MIT",
