@@ -1,4 +1,14 @@
 {
-  "name": "knerd/wp-config",
-  "type": "library"
+    "name": "xopher/wp-config",
+    "description": "WP Config helper",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "xopherdeep",
+            "email": "contact@midnightnerd.com"
+        }
+    ],
+    "require": {},
+    "version": "1.0.1"
 }
